@@ -82,6 +82,55 @@ npm run dev
 - **Parser**: php-parser-python
 - **Testing**: pytest + Hypothesis
 
+## Troubleshooting
+
+### GitHub Clone Error: "Cmd('git') not found"
+
+If you see this error when trying to clone a GitHub repository:
+
+```bash
+# Quick fix - rebuild the backend container
+./REBUILD_BACKEND.sh
+```
+
+Or manually:
+```bash
+docker-compose down
+docker-compose build --no-cache backend
+docker-compose up -d
+```
+
+See [GITHUB_CLONE_TROUBLESHOOTING.md](GITHUB_CLONE_TROUBLESHOOTING.md) for detailed troubleshooting.
+
+### Common Issues
+
+**Container won't start:**
+```bash
+docker-compose logs backend
+docker-compose down -v
+docker-compose up --build
+```
+
+**Port already in use:**
+```bash
+# Change ports in docker-compose.yml
+# Or stop conflicting services
+```
+
+**Permission errors:**
+```bash
+docker-compose down
+docker volume prune -f
+docker-compose up -d
+```
+
+## Documentation
+
+- [DOCKER.md](DOCKER.md) - Docker setup and configuration
+- [GETTING_STARTED.md](GETTING_STARTED.md) - Detailed getting started guide
+- [GITHUB_CLONE_TROUBLESHOOTING.md](GITHUB_CLONE_TROUBLESHOOTING.md) - GitHub clone issues
+- [FRANKENSTEIN_THEME.md](FRANKENSTEIN_THEME.md) - UI theme guidelines
+
 ## License
 
 MIT

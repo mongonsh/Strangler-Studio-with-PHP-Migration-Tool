@@ -18,6 +18,8 @@ services:
     build:
       context: ./legacy-php
       dockerfile: Dockerfile
+    ports:
+      - "8080:80"
     environment:
       - API_BASE_URL=http://new-api:8000
       - ENVIRONMENT=dev

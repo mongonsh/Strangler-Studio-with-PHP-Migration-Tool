@@ -57,7 +57,7 @@ graph TB
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- Ports 80 available on your machine
+- Ports 80 and 8080 available on your machine
 
 ### Quick Start
 
@@ -73,10 +73,15 @@ graph TB
    ```
 
 3. **Access the application**
-   - Landing page: http://localhost/
-   - Requests (legacy): http://localhost/requests?use_new=0
-   - Requests (new API): http://localhost/requests?use_new=1
-   - API directly: http://localhost/api/requests
+   - **Via Gateway (recommended):**
+     - Landing page: http://localhost/
+     - Requests (legacy): http://localhost/requests?use_new=0
+     - Requests (new API): http://localhost/requests?use_new=1
+     - API directly: http://localhost/api/requests
+   
+   - **Direct access to Legacy PHP:**
+     - http://localhost:8080/
+     - http://localhost:8080/requests
 
 4. **Stop services**
    ```bash

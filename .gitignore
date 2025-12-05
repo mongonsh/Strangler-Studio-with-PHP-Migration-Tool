@@ -72,11 +72,9 @@ dist/
 build/
 
 # PHP Migration Tool specific
-php-migration-tool/backend/cloned_repos/
-php-migration-tool/backend/uploads/
-php-migration-tool/backend/generated_projects/
-php-migration-tool/frontend/dist/
-php-migration-tool/frontend/node_modules/
+**/cloned_repos/
+**/uploads/
+**/generated_projects/
 
 # Docker
 *.pid

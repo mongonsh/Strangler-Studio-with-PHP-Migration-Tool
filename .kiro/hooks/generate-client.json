@@ -1,0 +1,14 @@
+{
+  "name": "Generate API Client",
+  "description": "Generates typed client code from OpenAPI specification after successful validation",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "contracts/openapi.yaml"
+  },
+  "action": {
+    "type": "executeCommand",
+    "command": "bash scripts/generate_client.sh"
+  },
+  "enabled": true,
+  "runAfter": ["validate-openapi"]
+}

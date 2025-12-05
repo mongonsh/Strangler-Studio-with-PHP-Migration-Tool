@@ -1,0 +1,13 @@
+{
+  "name": "Validate OpenAPI Contract",
+  "description": "Validates the OpenAPI specification file when it changes",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "contracts/openapi.yaml"
+  },
+  "action": {
+    "type": "executeCommand",
+    "command": "bash scripts/validate_openapi.sh"
+  },
+  "enabled": true
+}

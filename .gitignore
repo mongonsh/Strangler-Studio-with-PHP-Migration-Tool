@@ -1,0 +1,104 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+ENV/
+env/
+.venv
+
+# Testing
+.pytest_cache/
+.hypothesis/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+coverage/
+*.cover
+.cache
+nosetests.xml
+coverage.xml
+*.log
+
+# PHP
+vendor/
+composer.lock
+*.cache
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Generated files
+generated/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node.js (if used for tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+dist/
+build/
+
+# PHP Migration Tool specific
+php-migration-tool/backend/cloned_repos/
+php-migration-tool/backend/uploads/
+php-migration-tool/backend/generated_projects/
+php-migration-tool/frontend/dist/
+php-migration-tool/frontend/node_modules/
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# DO NOT IGNORE - These must be committed
+# .kiro/ directory contains specs, steering, and hooks
+# !.kiro/

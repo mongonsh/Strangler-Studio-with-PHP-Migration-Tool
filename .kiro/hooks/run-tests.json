@@ -1,0 +1,13 @@
+{
+  "name": "Run Test Suite",
+  "description": "Executes all tests when Python or PHP code files are modified",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "**/*.{py,php}"
+  },
+  "action": {
+    "type": "executeCommand",
+    "command": "bash scripts/test_all.sh"
+  },
+  "enabled": true
+}

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - legacy-php
+      - new-api
+    networks:
+      - strangler-network
+    restart: unless-stopped
+
+  legacy-php:
+    build:
+      context: ./legacy-php
+      dockerfile: Dockerfile
+    environment:
+      - API_BASE_URL=http://new-api:8000
+      - ENVIRONMENT=dev
+    volumes:
+      - ./legacy-php:/var/www/html
+    networks:
+      - strangler-network
+    restart: unless-stopped
+
+  new-api:
+    build:
+      context: ./new-api
+      dockerfile: Dockerfile
+    environment:
+      - ENVIRONMENT=dev
+      - LOG_LEVEL=info
+    volumes:
+      - ./new-api:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - strangler-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  strangler-network:
+    driver: bridge

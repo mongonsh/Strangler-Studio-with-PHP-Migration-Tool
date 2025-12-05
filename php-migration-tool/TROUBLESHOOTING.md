@@ -1,271 +1,568 @@
-# Troubleshooting Guide
+# 🔧 Troubleshooting Guide
 
-## GitHub Cloning Issues
+## Common Issues and Solutions
 
-### Error: "Failed to clone repository"
+### 1. Logo Not Showing
 
-**Possible Causes:**
-
-1. **Git not installed in Docker container**
-   ```bash
-   # Rebuild the backend with git
-   docker-compose build --no-cache backend
-   docker-compose up -d
-   ```
-
-2. **Invalid repository URL**
-   - ✅ Correct: `https://github.com/username/repository`
-   - ❌ Wrong: `github.com/username/repository`
-   - ❌ Wrong: `git@github.com:username/repository.git`
-
-3. **Private repository**
-   - Currently only public repositories are supported
-   - Private repo support coming soon
-
-4. **Branch doesn't exist**
-   - Check the branch name (case-sensitive)
-   - Default is `main`, some repos use `master`
-
-5. **Repository doesn't exist**
-   - Verify the URL in your browser first
-   - Check for typos
-
-### Error: "No PHP files found in repository"
-
-The repository was cloned but contains no PHP files.
+**Symptoms:**
+- Logo image missing on deployed site
+- 404 error for `/frankshtein.png` in console
 
 **Solutions:**
-- Verify the repository contains PHP code
-- Check if PHP files are in a subdirectory
-- Ensure you're cloning the correct branch
 
-### Error: "Repository is private or requires authentication"
+#### A. Hard Refresh Browser
+```bash
+# Windows/Linux
+Ctrl + Shift + R
+
+# Mac
+Cmd + Shift + R
+```
+
+#### B. Verify File Exists
+```bash
+ls -la php-migration-tool/frontend/public/frankshtein.png
+```
+
+Should show: `326369 bytes`
+
+#### C. Check Vercel Build Logs
+1. Go to Vercel Dashboard
+2. Select frontend project
+3. Click latest deployment
+4. Check "Build Logs"
+5. Look for file copy errors
+
+#### D. Rebuild Frontend
+```bash
+# In Vercel Dashboard
+Deployments → Latest → Redeploy
+```
+
+---
+
+### 2. CORS Errors
+
+**Symptoms:**
+- Console error: `Access to fetch at '...' has been blocked by CORS policy`
+- API calls fail with CORS error
+- Network tab shows preflight OPTIONS request failing
 
 **Solutions:**
-- Make the repository public, or
-- Wait for private repository support (coming soon)
 
-## Live PHP Preview Issues
-
-### Error: "Cannot connect to localhost:PORT"
-
-**Possible Causes:**
-
-1. **PHP server not running**
-   ```bash
-   # Start PHP built-in server
-   cd /path/to/php/project
-   php -S localhost:8080
-   ```
-
-2. **Wrong port number**
-   - Check which port your PHP server is running on
-   - Common ports: 8080, 8000, 3000
-
-3. **Docker network isolation**
-   - If running in Docker, use `host.docker.internal` instead of `localhost`
-   - Or run PHP server on host machine
-
-4. **Firewall blocking**
-   - Check firewall settings
-   - Allow connections on the specified port
-
-### Preview shows blank/white screen
-
-**Solutions:**
-- Check browser console for errors
-- Verify PHP server is serving content
-- Try accessing `http://localhost:PORT` directly in browser
-
-## Docker Issues
-
-### Container won't start
-
-```bash
-# Check logs
-docker-compose logs backend
-docker-compose logs frontend
-
-# Rebuild from scratch
-docker-compose down -v
-docker-compose build --no-cache
-docker-compose up
-```
-
-### Port already in use
-
-```bash
-# Check what's using the port
-lsof -i :80
-lsof -i :8000
-
-# Kill the process or change ports in docker-compose.yml
-```
-
-### Out of disk space
-
-```bash
-# Clean up Docker
-docker system prune -a
-docker volume prune
-```
-
-## Backend API Issues
-
-### 500 Internal Server Error
-
-```bash
-# Check backend logs
-docker-compose logs backend
-
-# Restart backend
-docker-compose restart backend
-```
-
-### CORS errors in browser
-
-The backend should allow requests from the frontend. If you see CORS errors:
+#### A. Verify Frontend URL in Backend
+Edit `php-migration-tool/backend/main.py`:
 
 ```python
-# Check main.py has correct CORS origins
-allow_origins=["http://localhost", "http://localhost:80"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://your-frontend-url.vercel.app",  # ← Check this!
+        "https://*.vercel.app",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 ```
 
-## Frontend Issues
-
-### Blank screen
-
+#### B. Push Changes
 ```bash
-# Check frontend logs
-docker-compose logs frontend
-
-# Rebuild frontend
-docker-compose build --no-cache frontend
-docker-compose up -d frontend
+git add php-migration-tool/backend/main.py
+git commit -m "Fix CORS configuration"
+git push origin main
 ```
 
-### API calls failing
+#### C. Wait for Redeploy
+- Vercel auto-deploys on push
+- Wait 1-2 minutes
+- Check deployment status in dashboard
 
-1. Check backend is running: `docker-compose ps`
-2. Check backend health: `curl http://localhost:8000/`
-3. Check browser console for errors
+#### D. Test Backend Directly
+```bash
+curl -I https://your-backend.vercel.app/
+```
 
-## Testing the Setup
+Should return `200 OK` with CORS headers.
+
+---
+
+### 3. Timeout Errors
+
+**Symptoms:**
+- Error: `Function execution timed out`
+- GitHub clone fails
+- Analysis takes too long
+- 504 Gateway Timeout
+
+**Cause:**
+Vercel free tier has 10-second timeout.
+
+**Solutions:**
+
+#### A. Upgrade to Vercel Pro
+- Cost: $20/month
+- Timeout: 60 seconds
+- Better for file operations
+
+**How to upgrade:**
+1. Vercel Dashboard → Settings
+2. Billing → Upgrade to Pro
+3. Redeploy projects
+
+#### B. Use Railway for Backend (Free Alternative)
+
+**Railway Setup:**
+1. Go to https://railway.app
+2. Sign up with GitHub
+3. New Project → Deploy from GitHub
+4. Select your repository
+5. Set root directory: `php-migration-tool/backend`
+6. Add environment variables:
+   ```
+   PORT=8000
+   PYTHONUNBUFFERED=1
+   ```
+7. Deploy
+
+**Update Frontend:**
+Edit `frontend/vercel.json`:
+```json
+"destination": "https://your-app.railway.app/api/:path*"
+```
+
+#### C. Optimize Backend
+- Use shallow git clones
+- Limit analysis depth
+- Cache results
+- Process in chunks
+
+---
+
+### 4. API Not Working
+
+**Symptoms:**
+- API calls return 404
+- Backend not responding
+- Network errors
+
+**Solutions:**
+
+#### A. Test Backend Health
+```bash
+curl https://your-backend.vercel.app/
+```
+
+**Expected response:**
+```json
+{
+  "status": "healthy",
+  "service": "PHP Migration Tool API",
+  "version": "1.0.0"
+}
+```
+
+#### B. Check Backend URL in Frontend
+Edit `frontend/vercel.json`:
+```json
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://your-backend.vercel.app/api/:path*"
+    }
+  ]
+}
+```
+
+Verify URL is correct (no typos).
+
+#### C. Check Vercel Function Logs
+1. Vercel Dashboard → Backend Project
+2. Deployments → Latest
+3. Functions tab
+4. View logs for errors
+
+#### D. Test API Endpoints
+```bash
+# Test root
+curl https://your-backend.vercel.app/
+
+# Test health check
+curl https://your-backend.vercel.app/health
+
+# Test with verbose
+curl -v https://your-backend.vercel.app/
+```
+
+---
+
+### 5. Build Failures
+
+**Symptoms:**
+- Deployment fails
+- Build errors in logs
+- Red X on deployment
+
+**Solutions:**
+
+#### A. Check Build Logs
+1. Vercel Dashboard
+2. Failed deployment
+3. View "Build Logs"
+4. Look for error messages
+
+#### B. Common Build Errors
+
+**Frontend - Missing Dependencies:**
+```bash
+# In frontend/package.json, verify all deps listed
+npm install
+npm run build  # Test locally
+```
+
+**Backend - Python Errors:**
+```bash
+# In backend/requirements.txt, verify all deps listed
+pip install -r requirements.txt
+python -m main  # Test locally
+```
+
+**Wrong Root Directory:**
+- Frontend: `php-migration-tool/frontend`
+- Backend: `php-migration-tool/backend`
+
+#### C. Clear Build Cache
+In Vercel Dashboard:
+1. Settings → General
+2. Scroll to "Build & Development Settings"
+3. Clear build cache
+4. Redeploy
+
+---
+
+### 6. Environment Variables Missing
+
+**Symptoms:**
+- Backend errors about missing config
+- Features not working
+- Import errors
+
+**Solutions:**
+
+#### A. Add Environment Variables
+Vercel Dashboard → Project → Settings → Environment Variables
+
+**Backend:**
+```
+PYTHONUNBUFFERED=1
+GIT_PYTHON_REFRESH=quiet
+```
+
+**Frontend (if needed):**
+```
+VITE_API_URL=https://your-backend.vercel.app
+```
+
+#### B. Redeploy After Adding
+Environment changes require redeploy:
+1. Deployments → Latest
+2. Click "..." menu
+3. Redeploy
+
+---
+
+### 7. GitHub Clone Fails
+
+**Symptoms:**
+- Error: "Failed to clone repository"
+- Git command not found
+- Authentication errors
+
+**Solutions:**
+
+#### A. Public Repositories Only
+Vercel serverless functions can only clone public repos.
+
+**For private repos:**
+- Use personal access token
+- Add to environment variables
+- Update clone logic
+
+#### B. Check Repository URL
+```bash
+# Valid formats
+https://github.com/username/repo
+https://github.com/username/repo.git
+
+# Invalid
+git@github.com:username/repo.git  # SSH not supported
+```
+
+#### C. Verify Git is Available
+Check backend logs for git errors.
+
+**If git missing:**
+- Rebuild backend
+- Verify Dockerfile installs git
+- Check requirements.txt has gitpython
+
+#### D. Use Shallow Clone
+Backend already uses shallow clone:
+```python
+git.Repo.clone_from(
+    repo_url,
+    extract_dir,
+    depth=1,  # Shallow clone
+    single_branch=True
+)
+```
+
+---
+
+### 8. Animations Not Working
+
+**Symptoms:**
+- Logo shows but doesn't animate
+- No glow effects
+- Static appearance
+
+**Solutions:**
+
+#### A. Check CSS Loaded
+1. Open browser DevTools (F12)
+2. Network tab
+3. Refresh page
+4. Look for `frankenstein-theme.css`
+5. Should return 200 OK
+
+#### B. Check for CSS Errors
+1. Console tab
+2. Look for CSS parsing errors
+3. Fix any syntax errors
+
+#### C. Check Browser Support
+Animations use modern CSS:
+- Chrome/Edge: ✓ Full support
+- Firefox: ✓ Full support
+- Safari: ✓ Full support
+- IE11: ✗ Limited support
+
+#### D. Disable Reduced Motion
+Some users have "reduce motion" enabled:
+
+**Check:**
+```css
+@media (prefers-reduced-motion: reduce) {
+  /* Animations disabled */
+}
+```
+
+**Test:**
+- System Settings → Accessibility
+- Disable "Reduce motion"
+
+---
+
+### 9. Slow Performance
+
+**Symptoms:**
+- Slow page loads
+- Laggy animations
+- High CPU usage
+
+**Solutions:**
+
+#### A. Optimize Images
+```bash
+# Compress logo
+# Use tools like TinyPNG or ImageOptim
+```
+
+#### B. Reduce Animation Complexity
+Edit `frankenstein-theme.css`:
+```css
+/* Disable intensive animations */
+.frankenstein-logo {
+  animation: float-logo 6s ease-in-out infinite;
+  /* Remove electric-spark for better performance */
+}
+```
+
+#### C. Enable Caching
+Frontend already has caching headers in `vercel.json`.
+
+#### D. Use CDN
+Vercel automatically uses CDN for static assets.
+
+---
+
+### 10. Deployment Not Updating
+
+**Symptoms:**
+- Changes not showing
+- Old version still live
+- Cache issues
+
+**Solutions:**
+
+#### A. Hard Refresh
+```bash
+# Clear browser cache
+Ctrl + Shift + R (Windows/Linux)
+Cmd + Shift + R (Mac)
+```
+
+#### B. Check Deployment Status
+1. Vercel Dashboard
+2. Deployments tab
+3. Verify latest is "Ready"
+4. Check timestamp
+
+#### C. Force Redeploy
+1. Deployments → Latest
+2. Click "..." menu
+3. Redeploy
+4. Wait for completion
+
+#### D. Clear Vercel Cache
+```bash
+# Using Vercel CLI
+vercel --force
+```
+
+---
+
+## Debugging Checklist
+
+When something goes wrong:
+
+- [ ] Check browser console (F12)
+- [ ] Check Network tab for failed requests
+- [ ] Check Vercel deployment logs
+- [ ] Check Vercel function logs
+- [ ] Test backend URL directly
+- [ ] Verify environment variables
+- [ ] Check CORS configuration
+- [ ] Try hard refresh
+- [ ] Test in incognito mode
+- [ ] Check git status
+- [ ] Verify latest code pushed
+
+---
+
+## Getting More Help
+
+### 1. Check Documentation
+- `START_HERE.md` - Step-by-step guide
+- `DEPLOY_QUICKSTART.md` - Quick reference
+- `VERCEL_BOTH_DEPLOYMENT.md` - Comprehensive guide
+
+### 2. Check Vercel Logs
+- Dashboard → Project → Deployments
+- Click deployment → View logs
+- Functions tab for runtime logs
+
+### 3. Test Locally
+```bash
+# Frontend
+cd php-migration-tool/frontend
+npm run dev
+
+# Backend
+cd php-migration-tool/backend
+uvicorn main:app --reload
+```
+
+### 4. Vercel Support
+- Docs: https://vercel.com/docs
+- Support: https://vercel.com/support
+- Community: https://github.com/vercel/vercel/discussions
+
+### 5. Check GitHub Issues
+Search for similar issues in:
+- Vercel repository
+- FastAPI repository
+- Your project issues
+
+---
+
+## Prevention Tips
+
+### Before Deploying
+- [ ] Test locally first
+- [ ] Verify all files committed
+- [ ] Check git status clean
+- [ ] Review configuration files
+- [ ] Test in production mode locally
+
+### After Deploying
+- [ ] Test all features
+- [ ] Check browser console
+- [ ] Monitor Vercel logs
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+
+### Regular Maintenance
+- [ ] Monitor function execution times
+- [ ] Check error rates
+- [ ] Update dependencies
+- [ ] Review Vercel analytics
+- [ ] Optimize slow endpoints
+
+---
+
+## Quick Reference
 
 ### Test Backend
-
 ```bash
-# Health check
-curl http://localhost:8000/
-
-# Should return:
-# {"status":"healthy","service":"PHP Migration Tool API","version":"1.0.0"}
+curl https://your-backend.vercel.app/
 ```
 
-### Test GitHub Cloning
-
-```bash
-# Test with a public PHP repository
-curl -X POST http://localhost:8000/api/clone-github \
-  -H "Content-Type: application/json" \
-  -d '{"repo_url":"https://github.com/laravel/laravel","branch":"10.x"}'
+### Test Frontend
+```
+https://your-frontend.vercel.app/
 ```
 
-### Test PHP Preview
-
+### View Logs
 ```bash
-# Start a test PHP server
-cd /tmp
-echo "<?php echo 'Hello World'; ?>" > index.php
-php -S localhost:8080
-
-# Test connection
-curl -X POST http://localhost:8000/api/check-php-server \
-  -H "Content-Type: application/json" \
-  -d '{"port":8080,"project_id":"test"}'
+vercel logs <deployment-url>
 ```
 
-## Common Solutions
-
-### Complete Reset
-
+### Redeploy
 ```bash
-# Stop everything
-docker-compose down -v
-
-# Remove all data
-rm -rf php-migration-tool/backend/uploads/*
-rm -rf php-migration-tool/backend/outputs/*
-
-# Rebuild and start
-docker-compose build --no-cache
-docker-compose up
+vercel --prod
 ```
 
-### Check Dependencies
-
+### Check Status
 ```bash
-# Enter backend container
-docker-compose exec backend /bin/bash
-
-# Check git is installed
-git --version
-
-# Check Python packages
-pip list | grep -i git
+vercel ls
 ```
 
-### View Real-time Logs
+---
 
-```bash
-# All services
-docker-compose logs -f
+## Common Error Messages
 
-# Just backend
-docker-compose logs -f backend
+### "Function execution timed out"
+→ Upgrade to Pro or use Railway
 
-# Just frontend
-docker-compose logs -f frontend
-```
+### "CORS policy blocked"
+→ Update backend CORS with frontend URL
 
-## Getting Help
+### "404 Not Found"
+→ Check API URL in frontend config
 
-If issues persist:
+### "Git not found"
+→ Rebuild backend with git installed
 
-1. Check logs: `docker-compose logs`
-2. Verify all services running: `docker-compose ps`
-3. Test backend directly: `curl http://localhost:8000/`
-4. Check browser console for frontend errors
-5. Try a complete rebuild: `docker-compose build --no-cache`
+### "Module not found"
+→ Check requirements.txt / package.json
 
-## Known Issues
+### "Build failed"
+→ Check build logs for specific error
 
-### Issue: GitPython not found
-**Solution:** Rebuild backend container with `docker-compose build --no-cache backend`
+---
 
-### Issue: Permission denied on uploads directory
-**Solution:** 
-```bash
-docker-compose exec backend chmod 777 uploads outputs
-```
-
-### Issue: Frontend can't reach backend
-**Solution:** Check nginx.conf proxy settings and CORS configuration
-
-## Quick Fixes
-
-```bash
-# Fix 1: Rebuild everything
-docker-compose down && docker-compose build --no-cache && docker-compose up
-
-# Fix 2: Clear volumes
-docker-compose down -v && docker-compose up
-
-# Fix 3: Restart services
-docker-compose restart
-
-# Fix 4: Check service health
-docker-compose ps
-curl http://localhost:8000/
-curl http://localhost/
-```
+**Still stuck?** Check the comprehensive guides in `php-migration-tool/` directory!

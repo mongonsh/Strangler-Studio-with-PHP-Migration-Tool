@@ -38,8 +38,15 @@ function App() {
   return (
     <div className="min-h-screen py-12 px-4" style={{ position: 'relative', zIndex: 1 }}>
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header with Animated Logo */}
         <div className="text-center mb-16">
+          <div className="logo-container mb-8">
+            <img 
+              src="/frankshtein.png" 
+              alt="Frankenstein PHP Logo" 
+              className="frankenstein-logo"
+            />
+          </div>
           <h1 className="title-frankenstein text-6xl mb-6">
             Frankenstein Laboratory
           </h1>

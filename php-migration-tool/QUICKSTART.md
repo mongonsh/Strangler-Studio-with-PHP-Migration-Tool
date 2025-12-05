@@ -1,126 +1,132 @@
-# Quick Start Guide
+# ⚡ Vercel Deployment - Quick Reference
 
-## Setup
+## 📋 Checklist
 
-### 1. Backend Setup
+- [ ] Code pushed to GitHub
+- [ ] Backend deployed (Project 1)
+- [ ] Backend URL copied
+- [ ] Frontend vercel.json updated with backend URL
+- [ ] Frontend deployed (Project 2)
+- [ ] Frontend URL copied
+- [ ] Backend main.py updated with frontend URL
+- [ ] Changes pushed to GitHub
+- [ ] Tested in browser
 
-```bash
-cd php-migration-tool/backend
+## 🔗 URLs to Fill In
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend
-python main.py
+### Backend URL (from Step 2):
+```
+https://________________________________.vercel.app
 ```
 
-Backend will run on: http://localhost:8000
-
-### 2. Frontend Setup
-
-```bash
-cd php-migration-tool/frontend
-
-# Install dependencies
-npm install
-
-# Run frontend
-npm run dev
+### Frontend URL (from Step 4):
+```
+https://________________________________.vercel.app
 ```
 
-Frontend will run on: http://localhost:5173
+## 📝 Files to Edit
 
-## Usage
-
-1. **Open Browser**: Navigate to http://localhost:5173
-
-2. **Upload PHP Project**:
-   - Create a ZIP file of your PHP project
-   - Upload it through the web interface
-
-3. **Analyze**:
-   - Tool automatically analyzes your PHP code
-   - Extracts routes, models, and dependencies
-
-4. **Generate**:
-   - Click "Generate Python Code"
-   - Creates FastAPI project with:
-     - OpenAPI specification
-     - FastAPI routes
-     - Pydantic models
-     - Test suite
-
-5. **Download**:
-   - Preview generated files
-   - Download complete Python project as ZIP
-
-6. **Run Migrated Project**:
-   ```bash
-   unzip migrated-python-api-*.zip
-   cd migrated-python-api-*
-   pip install -r requirements.txt
-   uvicorn main:app --reload
-   ```
-
-## Test with Example
-
-Use the existing `legacy-php` folder from Strangler Studio:
-
-```bash
-# Create ZIP of legacy-php
-cd ..
-zip -r legacy-php.zip legacy-php/
-
-# Upload this ZIP through the web UI
+### 1. `frontend/vercel.json`
+```json
+"destination": "https://YOUR-BACKEND-URL.vercel.app/api/:path*"
 ```
 
-## API Endpoints
+### 2. `backend/main.py`
+```python
+allow_origins=[
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://YOUR-FRONTEND-URL.vercel.app",
+    "https://*.vercel.app",
+]
+```
 
-- `POST /api/upload` - Upload PHP project ZIP
-- `POST /api/analyze/{upload_id}` - Analyze PHP code
-- `POST /api/generate/{upload_id}` - Generate Python code
-- `GET /api/download/{output_id}` - Download generated project
-- `GET /api/preview/{output_id}/{filename}` - Preview file
+## 🚀 Deploy Commands
 
-## Features
+### Backend (Project 1)
+- Root Directory: `php-migration-tool/backend`
+- Framework: Other
+- Install: `pip install -r requirements.txt`
 
-✅ Extracts routes from Laravel, Slim, Symfony, and plain PHP
-✅ Converts PHP classes to Pydantic models
-✅ Generates OpenAPI 3.0 specifications
-✅ Creates FastAPI endpoints
-✅ Generates pytest test suite
-✅ Beautiful web UI with progress tracking
-✅ File preview before download
+### Frontend (Project 2)
+- Root Directory: `php-migration-tool/frontend`
+- Framework: Vite
+- Build: `npm run build`
+- Output: `dist`
 
-## Troubleshooting
+## ✅ Test Checklist
 
-**Backend won't start:**
-- Check Python version (3.9+)
-- Ensure all dependencies installed
-- Check port 8000 is available
+- [ ] Frontend loads
+- [ ] Logo shows and animates
+- [ ] No console errors
+- [ ] GitHub clone works
+- [ ] Analysis works
+- [ ] Download works
 
-**Frontend won't start:**
-- Check Node.js version (16+)
-- Run `npm install` again
-- Check port 5173 is available
+## 🆘 Quick Fixes
 
-**Upload fails:**
-- Ensure file is a valid ZIP
-- Check file size (< 100MB recommended)
-- Verify backend is running
+### CORS Error
+```bash
+# Update backend/main.py with frontend URL
+git add backend/main.py
+git commit -m "Fix CORS"
+git push
+```
 
-## Next Steps
+### Logo Missing
+- File should be at: `frontend/public/frankshtein.png`
+- Check browser console for 404
 
-- Add AI integration (OpenAI GPT-4) for complex logic
-- Implement more PHP framework support
-- Add database migration tools
-- Create deployment scripts
-- Add more test generation patterns
+### Timeout Error
+- Upgrade to Vercel Pro ($20/month)
+- Or use Railway for backend
 
-## License
+## 📚 Full Guides
 
-MIT
+- **Detailed:** `VERCEL_BOTH_DEPLOYMENT.md`
+- **Step-by-step:** `START_HERE.md`
+- **Checklist:** `VERCEL_CHECKLIST.md`
+
+## ⏱️ Time Estimate
+
+- Backend deploy: 3 minutes
+- Frontend deploy: 3 minutes
+- Configuration: 5 minutes
+- Testing: 5 minutes
+- **Total: ~15 minutes**
+
+## 🎯 Success Criteria
+
+When everything works:
+1. Frontend URL opens in browser
+2. Animated logo visible
+3. All 4 stages visible
+4. Can enter GitHub URL
+5. No errors in console
+
+## 💡 Pro Tips
+
+1. **Deploy backend first** - frontend needs backend URL
+2. **Copy URLs immediately** - you'll need them
+3. **Test backend directly** - `curl https://your-backend.vercel.app/`
+4. **Use hard refresh** - Ctrl+Shift+R to clear cache
+5. **Check Vercel logs** - if something fails
+
+## 🔄 Auto-Deploy
+
+After initial setup, every `git push` will:
+- Auto-deploy to Vercel
+- Create preview for branches
+- Update production on main branch
+
+## 📊 Monitoring
+
+Check Vercel dashboard for:
+- Deployment status
+- Function logs
+- Error rates
+- Response times
+
+---
+
+**Ready?** Start with `START_HERE.md` for detailed instructions!

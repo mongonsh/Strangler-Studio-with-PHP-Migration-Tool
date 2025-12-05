@@ -9,7 +9,7 @@
 ```mermaid
 graph TB
     Client[Client Browser]
-    Gateway[Gateway<br/>nginx reverse proxy<br/>:80]
+    Gateway[Gateway<br/>nginx reverse proxy<br/>:8888]
     Legacy[Legacy PHP App<br/>Server-rendered HTML<br/>Feature flags]
     NewAPI[New API Service<br/>FastAPI + Python<br/>REST JSON endpoints]
     Contract[OpenAPI Contract<br/>Source of Truth<br/>YAML specification]
@@ -57,7 +57,7 @@ graph TB
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- Ports 80 and 8080 available on your machine
+- Ports 8888 and 8080 available on your machine
 
 ### Quick Start
 
@@ -74,10 +74,10 @@ graph TB
 
 3. **Access the application**
    - **Via Gateway (recommended):**
-     - Landing page: http://localhost/
-     - Requests (legacy): http://localhost/requests?use_new=0
-     - Requests (new API): http://localhost/requests?use_new=1
-     - API directly: http://localhost/api/requests
+     - Landing page: http://localhost:8888/
+     - Requests (legacy): http://localhost:8888/requests?use_new=0
+     - Requests (new API): http://localhost:8888/requests?use_new=1
+     - API directly: http://localhost:8888/api/requests
    
    - **Direct access to Legacy PHP:**
      - http://localhost:8080/
@@ -129,37 +129,37 @@ This automated script will:
 
 **Step 1: View the Landing Page**
 ```bash
-curl http://localhost/
+curl http://localhost:8888/
 ```
 You'll see the Halloween-themed landing page explaining the architecture.
 
 **Step 2: View Legacy Data (Stub)**
 ```bash
-curl http://localhost/requests?use_new=0
+curl http://localhost:8888/requests?use_new=0
 ```
 This uses the legacy stub data without calling the new API.
 
 **Step 3: View New API Data (Migration)**
 ```bash
-curl http://localhost/requests?use_new=1
+curl http://localhost:8888/requests?use_new=1
 ```
 This fetches data from the New API Service—demonstrating the migration!
 
 **Step 4: Access API Directly**
 ```bash
-curl http://localhost/api/requests
+curl http://localhost:8888/api/requests
 ```
 Direct access to the New API Service through the gateway.
 
 **Step 5: Get Single Request**
 ```bash
-curl http://localhost/api/requests/1
+curl http://localhost:8888/api/requests/1
 ```
 Retrieve a specific Student Request by ID.
 
 ### 3. Interactive Browser Demo
 
-1. Open http://localhost/ in your browser
+1. Open http://localhost:8888/ in your browser
 2. Click "Run the Ritual" button
 3. Toggle the witch switch between "Legacy Curse" and "Modern Magic"
 4. Observe the data source indicator change

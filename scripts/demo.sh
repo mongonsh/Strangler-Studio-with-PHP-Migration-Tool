@@ -9,7 +9,7 @@
 set -e
 
 # Configuration
-GATEWAY_URL="${GATEWAY_URL:-http://localhost}"
+GATEWAY_URL="${GATEWAY_URL:-http://localhost:8888}"
 MAX_WAIT=60  # Maximum seconds to wait for services to be ready
 CLEANUP_ON_EXIT=true
 
@@ -205,7 +205,7 @@ echo -e "  ${CHECK} New API service provides contract-first REST endpoints"
 echo -e "  ${CHECK} Premium Halloween theme applied throughout"
 echo ""
 echo -e "${YELLOW}${BOLD}Next Steps:${NC}"
-echo -e "  1. Open ${BLUE}http://localhost${NC} in your browser"
+echo -e "  1. Open ${BLUE}http://localhost:8888${NC} in your browser"
 echo -e "  2. Click the ${MAGENTA}'Run the Ritual'${NC} button"
 echo -e "  3. Toggle the ${CYAN}'Witch Switch'${NC} to see the migration in action"
 echo ""
